@@ -1,0 +1,1 @@
+small script to pull IP addresses from a server access log and query a geolocation database with the avaliable ip info. returns ISP info, country,state(if applicable) and all other info for curiosity purposes
