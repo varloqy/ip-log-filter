@@ -1,8 +1,11 @@
+#!/usr/bin/python3
 import re
 import requests
+import time
+import argparse
 URL = "http://ip-api.com/json/"
 
-def extract_and_geoip(log_file_path, output_file_path):
+def extract_and_locate(log_file_path, output_file_path):
     # Regex for IPv4 addresses at the start of Apache log lines
     ip_pattern = re.compile(r'^(\d{1,3}(?:\.\d{1,3}){3})')
     unique_ips = set()
@@ -18,18 +21,28 @@ def extract_and_geoip(log_file_path, output_file_path):
 
     with open(output_file_path, 'w') as out_file:
         for ip in sorted_ips:
+            #print current working ip in console
+            time.sleep(0.034)
+            print(ip)
+            #send GET request to API and write response to output file
             try:
-                response = requests.get(f"{URL}ip")
-                out_file.write(f"{ip} - {response.stdout.strip()}\n")
+                response = requests.get(f"{URL}{ip}")
+                out_file.write(f"{ip} - {response.json()}\n")
             except Exception as e:
                 out_file.write(f"{ip} - ERROR: {e}\n")
 
-    print(sorted_ips)
     print(f"[+] Processed {len(sorted_ips)} unique IPs.")
     print(f"[+] Results saved to {output_file_path}")
 
+def main():
+    #add arguments function
+    parser = argparse.ArgumentParser("server log file geolocater")
+    parser.add_argument("input", help="Path to input file")
+    parser.add_argument("-o", "--output", default="geoip_results.txt", help="Output file name")
+
+    args = parser.parse_args()
+    #run main script
+    extract_and_locate(args.input, args.output)
 
 if __name__ == "__main__":
-    log_path = "access.log"       # Path to your Apache log
-    output_path = "geoip_results.txt"
-    extract_and_geoip(log_path, output_path)
+    main() #run main function
