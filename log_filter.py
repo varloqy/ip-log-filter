@@ -1,5 +1,6 @@
 import re
-import http
+import requests
+URL = "http://ip-api.com/json/"
 
 def extract_and_geoip(log_file_path, output_file_path):
     # Regex for IPv4 addresses at the start of Apache log lines
@@ -15,8 +16,15 @@ def extract_and_geoip(log_file_path, output_file_path):
 
     sorted_ips = sorted(unique_ips)
 
-    print(sorted_ips)
+    with open(output_file_path, 'w') as out_file:
+        for ip in sorted_ips:
+            try:
+                response = requests.get(f"{URL}ip")
+                out_file.write(f"{ip} - {response.stdout.strip()}\n")
+            except Exception as e:
+                out_file.write(f"{ip} - ERROR: {e}\n")
 
+    print(sorted_ips)
     print(f"[+] Processed {len(sorted_ips)} unique IPs.")
     print(f"[+] Results saved to {output_file_path}")
 
